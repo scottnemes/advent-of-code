@@ -77,21 +77,17 @@ def move_rope_tail(head_x, head_y, tail_x, tail_y, tail_locations, actual_tail):
 
 # move the head and then move the (first/only) tal after
 def move_rope_head(head_x, head_y, tail_x, tail_y, tail_locations, direction, actual_tail = True):
-    grid = [["O" for i in range(6)] for j in range(5)]
     if direction == "U":
         head_y += 1
-        head_x, head_y, tail_x, tail_y, tail_locations = move_rope_tail(head_x, head_y, tail_x, tail_y, tail_locations, actual_tail)
     elif direction == "D":
         head_y -= 1
-        head_x, head_y, tail_x, tail_y, tail_locations = move_rope_tail(head_x, head_y, tail_x, tail_y, tail_locations, actual_tail)
     elif direction == "L":
         head_x -= 1
-        head_x, head_y, tail_x, tail_y, tail_locations = move_rope_tail(head_x, head_y, tail_x, tail_y, tail_locations, actual_tail)
     elif direction == "R":
         head_x += 1
-        head_x, head_y, tail_x, tail_y, tail_locations = move_rope_tail(head_x, head_y, tail_x, tail_y, tail_locations, actual_tail)
     else:
         print("Critical failure, party wipe.")
+    head_x, head_y, tail_x, tail_y, tail_locations = move_rope_tail(head_x, head_y, tail_x, tail_y, tail_locations, actual_tail)
     return head_x, head_y, tail_x, tail_y, tail_locations
 
 
