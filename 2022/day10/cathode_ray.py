@@ -46,7 +46,7 @@ def main():
     cpu_instructions = import_cpu_instructions("input.txt")
     crt_cols = 40
     crt_rows = 6
-    crt_screen = [["." for i in range(crt_cols)] for j in range(crt_rows)]
+    crt_screen = [[" " for i in range(crt_cols)] for j in range(crt_rows)]
     # adds up all the required cycles so we know how long to make the program list
     total_cycles = 0
     for line in cpu_instructions:
