@@ -9,6 +9,11 @@ import (
 	"unicode"
 )
 
+type value struct {
+	num string
+	idx int
+}
+
 func solution(part int) int {
 	inputs, err := os.Open("input.txt")
 	if err != nil {
@@ -38,11 +43,6 @@ func solution(part int) int {
 
 		l := 0
 		r := len(line) - 1
-
-		type value struct {
-			num string
-			idx int
-		}
 
 		v1 := value{num: "", idx: -1}
 		v2 := value{num: "", idx: -1}
