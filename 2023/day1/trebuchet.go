@@ -9,11 +9,11 @@ import (
 	"unicode"
 )
 
-func main() {
+func solution(part int) int {
 	inputs, err := os.Open("input.txt")
 	if err != nil {
 		fmt.Println("Failed to open puzzle inputs, RIP:", err)
-		return
+		return -1
 	}
 	defer inputs.Close()
 
@@ -64,28 +64,41 @@ func main() {
 			l += 1
 			r -= 1
 		}
-		// check the line for written out numbers
-		for k, v := range nums {
-			// if the number is not in the line at all, skip it
-			if strings.Index(line, k) == -1 {
-				continue
-			}
-			// if the index of the written out number is before (for left-most) or after (for right-most), use that instead
-			if strings.Index(line, k) >= 0 && (strings.Index(line, k) < v1.idx || v1.idx == -1) {
-				v1.num = v
-				v1.idx = strings.Index(line, k)
-			}
-			if strings.LastIndex(line, k) >= 0 && (strings.LastIndex(line, k) > v2.idx || v2.idx == -1) {
-				v2.num = v
-				v2.idx = strings.LastIndex(line, k)
+		if part == 2 {
+			// check the line for written out numbers
+			for k, v := range nums {
+				// if the number is not in the line at all, skip it
+				if strings.Index(line, k) == -1 {
+					continue
+				}
+				// if the index of the written out number is before (for left-most) or after (for right-most), use that instead
+				if strings.Index(line, k) >= 0 && (strings.Index(line, k) < v1.idx || v1.idx == -1) {
+					v1.num = v
+					v1.idx = strings.Index(line, k)
+				}
+				if strings.LastIndex(line, k) >= 0 && (strings.LastIndex(line, k) > v2.idx || v2.idx == -1) {
+					v2.num = v
+					v2.idx = strings.LastIndex(line, k)
+				}
 			}
 		}
 		ivalue, _ := strconv.Atoi(fmt.Sprintf("%s%s", v1.num, v2.num))
 		total += ivalue
 	}
-	fmt.Println(total)
 
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Failed to read from input puzzle inputs, RIP:", err)
 	}
+
+	return total
+}
+
+func main() {
+	// part 1
+	total := solution(1)
+	fmt.Println("Part 1:", total)
+
+	// part 2
+	total = solution(2)
+	fmt.Println("Part 2:", total)
 }
