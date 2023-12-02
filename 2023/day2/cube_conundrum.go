@@ -58,7 +58,6 @@ func solution() (int, int) {
 		match = true
 		sub = 1
 		// loop over the required cubes
-		// if we find a required cube that is not met, break early
 		for c, n := range target {
 			// multiply each max seen color cube count togther to get the power factor
 			sub *= p[c]
