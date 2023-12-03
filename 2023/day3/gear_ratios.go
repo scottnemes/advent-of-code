@@ -13,6 +13,12 @@ func isSymbol(r rune) bool {
 	return unicode.IsSymbol(r) || (unicode.IsPunct(r) && string(r) != ".")
 }
 
+type symbol struct {
+	val string
+	row int
+	col int
+}
+
 func solution() (int, int) {
 	inputs, err := os.Open("input.txt")
 	if err != nil {
@@ -26,7 +32,7 @@ func solution() (int, int) {
 	var engine [][]string
 	rows := 0
 	cols := 0
-	symbols := map[int][]int{}
+	symbols := map[int][]symbol{}
 	nums := map[int]map[int][]int{}
 	num := ""
 	j := []int{} // used to track indexes of numbers
@@ -56,7 +62,7 @@ func solution() (int, int) {
 			}
 			// parse symbols
 			if isSymbol(c) {
-				symbols[rows] = append(symbols[rows], i)
+				symbols[rows] = append(symbols[rows], symbol{val: string(c), row: rows, col: i})
 			}
 		}
 		// check if there was a number at the end of the line
@@ -78,22 +84,72 @@ func solution() (int, int) {
 	p1Total := 0
 	p2Total := 0
 
-	// fmt.Println(nums)
-	// fmt.Println(symbols)
+	// part 1
+	cols1 := []int{}
+	cols2 := []int{}
+	cols3 := []int{}
 	for k, v := range nums {
 		// k = number
 		// v = map of col/row
 		for i, j := range v {
+			cols1 = []int{}
+			cols2 = []int{}
+			cols3 = []int{}
 			// i = row number
 			// j = []int of cols
 			for _, g := range j {
 				// g = cols
-				if slices.Contains(symbols[i-1], g) || 
-				slices.Contains(symbols[i], g) || 
-				slices.Contains(symbols[i+1], g) {
+				for _, s := range symbols[i-1] {
+					cols1 = append(cols1, s.col)
+				}
+				for _, s := range symbols[i] {
+					cols2 = append(cols2, s.col)
+				}
+				for _, s := range symbols[i+1] {
+					cols3 = append(cols3, s.col)
+				}
+				if slices.Contains(cols1, g) || 
+				slices.Contains(cols2, g) || 
+				slices.Contains(cols3, g) {
 					p1Total += k
 				}
 			}
+		}
+	}
+
+	// part 2
+	adjNums := []int{}
+	for _, syms := range symbols {
+		for _, sym := range syms {
+			// skip if this is not a *
+			if sym.val != "*" {
+				continue
+			}
+			for num, v := range nums {
+				// v = map of col/row
+				for numRow, j := range v {
+					// j = []int of cols
+					// if the number is not in an adjacent row to the symbol, skip it
+					if numRow < (sym.row - 1) || numRow > (sym.row + 1) {
+						continue
+					}
+					for _, numCol := range j {
+						if sym.col == numCol {
+							//fmt.Println(numRow, numCol)
+							adjNums = append(adjNums, num)
+							break
+						}
+					}
+				}
+			}
+			if len(adjNums) == 2 {
+				// if adjNums[0] == 670 || adjNums[1] == 670 {
+				// 	fmt.Println(adjNums)
+				// }
+				fmt.Println(adjNums)
+				p2Total += (adjNums[0] * adjNums[1])
+			}
+			adjNums = []int{}
 		}
 	}
 
