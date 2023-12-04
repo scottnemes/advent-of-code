@@ -31,34 +31,33 @@ func solution() (int, int) {
 	
 	var engine [][]string
 	rows := 0
-	cols := 0
 	symbols := map[int][]symbol{}
 	nums := map[int]map[int][]int{}
 	num := ""
-	j := []int{} // used to track indexes of numbers
+	numIdxs := []int{} // used to track indexes of numbers
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		row := []string{}
 		num = ""
-		j = []int{}
+		numIdxs = []int{}
 		for i, c := range line {
 			row = append(row, string(c))
 			// parse numbers
 			if unicode.IsNumber(c) {
 				num += string(c)
-				j = append(j, i) // keep track of the columns/indexes that the number takes up
+				numIdxs = append(numIdxs, i) // keep track of the columns/indexes that the number takes up
 			} else if num != "" {
 				// number stopped, store it and restart
 				n, _ := strconv.Atoi(num)
 				// add one before and one after the number to catch neighbors/diagonals
-				j = append(j, j[0]-1, j[len(j)-1]+1)
+				numIdxs = append(numIdxs, numIdxs[0]-1, numIdxs[len(numIdxs)-1]+1)
 				if nums[n] == nil {
 					nums[n] = map[int][]int{}
 				}
-				nums[n][rows] = append(nums[n][rows], j...)
+				nums[n][rows] = append(nums[n][rows], numIdxs...)
 				num = ""
-				j = []int{}
+				numIdxs = []int{}
 			}
 			// parse symbols
 			if isSymbol(c) {
@@ -69,15 +68,14 @@ func solution() (int, int) {
 		if num != "" {
 			n, _ := strconv.Atoi(num)
 			// add one before and one after the number to catch neighbors/diagonals
-			j = append(j, j[0]-1, j[len(j)-1]+1)
+			numIdxs = append(numIdxs, numIdxs[0]-1, numIdxs[len(numIdxs)-1]+1)
 			if nums[n] == nil {
 				nums[n] = map[int][]int{}
 			}
-			nums[n][rows] = j
+			nums[n][rows] = numIdxs
 		}
 
 		engine = append(engine, row)
-		cols = max(cols, len(row))
 		rows += 1
 	}
 
@@ -135,18 +133,14 @@ func solution() (int, int) {
 					}
 					for _, numCol := range j {
 						if sym.col == numCol {
-							//fmt.Println(numRow, numCol)
 							adjNums = append(adjNums, num)
 							break
 						}
 					}
 				}
 			}
+			// if the * has exactly two neighboring numbers, use it
 			if len(adjNums) == 2 {
-				// if adjNums[0] == 670 || adjNums[1] == 670 {
-				// 	fmt.Println(adjNums)
-				// }
-				fmt.Println(adjNums)
 				p2Total += (adjNums[0] * adjNums[1])
 			}
 			adjNums = []int{}
@@ -161,7 +155,6 @@ func solution() (int, int) {
 }
 
 func main() {
-	// part 1
 	p1Total, p2Total := solution()
 	fmt.Println("Part 1:", p1Total)
 	fmt.Println("Part 2:", p2Total)
