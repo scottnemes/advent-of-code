@@ -128,4 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-go.mod
+# AdventOfCode
+input.txt
+sample.txt
