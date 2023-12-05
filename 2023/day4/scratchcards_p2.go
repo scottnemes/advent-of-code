@@ -10,9 +10,8 @@ import (
 )
 
 type Card struct {
-	number int
-	winning []string
-	current []string
+	id int
+	wins int
 }
 
 func solution() (int) {
@@ -26,46 +25,47 @@ func solution() (int) {
 	scanner := bufio.NewScanner(inputs)
 
 	cards := []Card{}
-	cardNum := ""
+	cardNum := 0
 	winNums := []string{}
 	ourNums := []string{}
-	
+	wins := 0
+
+	allCards := []Card{}
+	card := Card{}
+
 	for scanner.Scan() {
+		wins = 0
 		line := scanner.Text()
 		split := strings.Split(line, ": ")
-		cardNum = strings.Fields(split[0])[1]
+		cardNum, _ = strconv.Atoi(strings.Fields(split[0])[1])
 		winNums = strings.Split(strings.Split(split[1], " | ")[0], " ")
 		ourNums = strings.Split(strings.Split(split[1], " | ")[1], " ")
-		card := Card{}
-		card.winning = winNums
-		card.current = ourNums
-		card.number, _ = strconv.Atoi(cardNum)
-		card.number -= 1
+		for _, num := range ourNums {
+			if num != "" && slices.Contains(winNums, num) {
+				wins += 1
+			}
+		}
+		card = Card{}
+		card.id = cardNum - 1
+		card.wins = wins
 		cards = append(cards, card)
 	}
 
 	p2Total := 0
 
-	allCards := []Card{}
 	allCards = append(allCards, cards...)
 
-	wins := 0
 	k := 0 // current card index
 	for k < len(allCards) {
-		card := allCards[k]
-		for _, num := range card.current {
-			if num != "" && slices.Contains(card.winning, num) {
-				wins += 1
-			}
-		}
+		card = allCards[k]
+		wins = card.wins
 		if wins > 0 {
 			for i := 1; i <= wins; i += 1 {
-				allCards = append(allCards, cards[card.number + i])
+				allCards = append(allCards, cards[card.id+i])
 			}
 		}
-		p2Total += 1
-		wins = 0
 		k += 1
+		p2Total += 1
 	}
 
 	if err := scanner.Err(); err != nil {
