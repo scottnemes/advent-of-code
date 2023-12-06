@@ -66,6 +66,7 @@ func solution() (int) {
 	temperatureToHumidity := map[int]map[string]int{}
 	humidityToLocation := map[int]map[string]int{}
 	
+	// build out maps
 	x := 0
 	for scanner.Scan() {
 		x += 1
@@ -113,6 +114,7 @@ func solution() (int) {
 		}
 	}
 
+	// process the seeds, brute force style
 	closest := 999999999999999999
 
 	var wg sync.WaitGroup
