@@ -4,34 +4,38 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // input map: # # # (destination range start, the source range start, and the range length)
 // Any source numbers that aren't mapped correspond to the same destination
 
-func addToMap(m map[string]int, vals []string) {
+func addToMap(m map[int]map[string]int, key int, vals []string) {
 	dstStart, _ := strconv.Atoi(vals[0])
 	srcStart, _ := strconv.Atoi(vals[1])
 	rng, _ := strconv.Atoi(vals[2])
 	// key is the source start - source end
 	// dest can be calculated by substracting the lookup value from the srcStart, and adding that to the dstStart
-	m[fmt.Sprintf("%d-%d", srcStart, srcStart + rng - 1)] = dstStart
+	entry := map[string]int{}
+	entry["srcStart"] = srcStart
+	entry["srcEnd"] = srcStart + rng - 1
+	entry["dstStart"] = dstStart
+	m[key] = entry
 }
 
-func lookupValue(m map[string]int, v int) int {
+func lookupValue(m map[int]map[string]int, v int) int {
 	srcStart := -1
 	srcEnd := -1
 	dest := -1
-	for rng, d := range m {
+	for _, d := range m {
 		// parse start/end source range from map key
-		srcStart, _ = strconv.Atoi(strings.Split(rng, "-")[0])
-		srcEnd, _ = strconv.Atoi(strings.Split(rng, "-")[1])
+		srcStart = d["srcStart"]
+		srcEnd = d["srcEnd"]
 		// if our value (v) is within this range, use it
 		if srcStart <= v && v <= srcEnd {
-			dest = d + (v - srcStart)
+			dest = d["dstStart"] + (v - srcStart)
 		}
 	}
 	// if we found no mapping for this value, use the value itself
@@ -54,17 +58,17 @@ func solution() (int) {
 	prefix := ""
 	values := []string{}
 	seeds := [][]int{}
-	seedToSoilMap := map[string]int{}
-	soilToFertilizer := map[string]int{}
-	fertilizerToWater := map[string]int{}
-	waterToLight := map[string]int{}
-	lightToTemperature := map[string]int{}
-	temperatureToHumidity := map[string]int{}
-	humidityToLocation := map[string]int{}
+	seedToSoilMap := map[int]map[string]int{}
+	soilToFertilizer := map[int]map[string]int{}
+	fertilizerToWater := map[int]map[string]int{}
+	waterToLight := map[int]map[string]int{}
+	lightToTemperature := map[int]map[string]int{}
+	temperatureToHumidity := map[int]map[string]int{}
+	humidityToLocation := map[int]map[string]int{}
 	
-	loc := 0
-
+	x := 0
 	for scanner.Scan() {
+		x += 1
 		line := scanner.Text()
 		if line == "" {
 			continue
@@ -93,64 +97,56 @@ func solution() (int) {
 		values = strings.Split(line, " ")
 		switch prefix {
 		case "seed-to-soil":
-			addToMap(seedToSoilMap, values)
+			addToMap(seedToSoilMap, x, values)
 		case "soil-to-fertilizer":
-			addToMap(soilToFertilizer, values)
+			addToMap(soilToFertilizer, x, values)
 		case "fertilizer-to-water":
-			addToMap(fertilizerToWater, values)
+			addToMap(fertilizerToWater, x, values)
 		case "water-to-light":
-			addToMap(waterToLight, values)
+			addToMap(waterToLight, x, values)
 		case "light-to-temperature":
-			addToMap(lightToTemperature, values)
+			addToMap(lightToTemperature, x, values)
 		case "temperature-to-humidity":
-			addToMap(temperatureToHumidity, values)
+			addToMap(temperatureToHumidity, x, values)
 		case "humidity-to-location":
-			addToMap(humidityToLocation, values)
+			addToMap(humidityToLocation, x, values)
 		}
 	}
 
-	soil := -1
-	fert := -1
-	water := -1
-	light := -1
-	temp := -1
-	hum := -1
+	closest := 999999999999999999
 
-	closest := []int{}
-
-	seed := -1
-	seedStart := -1
-	seedRange := -1
+	var wg sync.WaitGroup
+	var mutex = &sync.Mutex{}
 
 	for _, seedPair := range seeds {
-		seedStart = seedPair[0]
-		seedRange = seedPair[1]
+		seedStart := seedPair[0]
+		seedRange := seedPair[1]
 		for i := 0; i < seedRange; i += 1 {
-			seed = seedStart + i
-			soil = lookupValue(seedToSoilMap, seed)
-			fert = lookupValue(soilToFertilizer, soil)
-			water = lookupValue(fertilizerToWater, fert)
-			light = lookupValue(waterToLight, water)
-			temp = lookupValue(lightToTemperature, light)
-			hum = lookupValue(temperatureToHumidity, temp)
-			loc = lookupValue(humidityToLocation, hum)
-			closest = append(closest, loc)
-			// fmt.Println("Seed:", seed)
-			// fmt.Println("Soil:", soil)
-			// fmt.Println("Fert:", fert)
-			// fmt.Println("Water:", water)
-			// fmt.Println("Light:", light)
-			// fmt.Println("Temp:", temp)
-			// fmt.Println("Hum:", hum)
-			// fmt.Println("Loc:", loc)
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				defer mutex.Unlock()
+				seed := seedStart + i
+				soil := lookupValue(seedToSoilMap, seed)
+				fert := lookupValue(soilToFertilizer, soil)
+				water := lookupValue(fertilizerToWater, fert)
+				light := lookupValue(waterToLight, water)
+				temp := lookupValue(lightToTemperature, light)
+				hum := lookupValue(temperatureToHumidity, temp)
+				loc := lookupValue(humidityToLocation, hum)
+				mutex.Lock()
+				closest = min(closest, loc)
+			}(i)
 		}
 	}
+
+	wg.Wait()
 
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Failed to read from input puzzle inputs, RIP:", err)
 	}
 
-	return slices.Min(closest)
+	return closest
 }
 
 func main() {
