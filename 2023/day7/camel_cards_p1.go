@@ -27,7 +27,6 @@ type Card struct {
 type Hand struct {
 	cards []Card
 	bid int
-	rank int
 	counts map[string]int
 	strongest int // best hand that can be made from these cards
 }
@@ -109,7 +108,6 @@ func (g *Game) sort() bool {
 		}
 	}
 	g.hands = sorted
-	fmt.Println(changed)
 	return changed
 }
 
@@ -165,10 +163,6 @@ func solution() (int) {
 	}
 
 	for game.sort() { }
-
-	for _, h := range game.hands {
-		fmt.Println(h.cards, h.bid, h.strongest)
-	}
 
 	total := 0
 

@@ -27,7 +27,6 @@ type Card struct {
 type Hand struct {
 	cards []Card
 	bid int
-	rank int
 	counts map[string]int
 	strongest int // best hand that can be made from these cards
 }
