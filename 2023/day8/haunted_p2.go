@@ -8,8 +8,27 @@ import (
 	"sync"
 )
 
+type StartNode struct {
+	lastCount   int
+	lastTurnIdx int
+	nextNode    string
+}
+
+func lcm(a, b int) int {
+	return a * b / gcd(a, b)
+}
+
+func gcd(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
+}
+
 func solution() int {
-	inputs, err := os.Open("sample.txt")
+	inputs, err := os.Open("input.txt")
 	if err != nil {
 		fmt.Println("Failed to open puzzle inputs, RIP:", err)
 		return -1
@@ -18,7 +37,7 @@ func solution() int {
 
 	turns := []string{}
 	nodes := map[string][]string{}
-	startNodes := map[string][]string{}
+	startNodes := map[string]StartNode{}
 	directions := map[string]int{
 		"L": 0,
 		"R": 1,
@@ -46,58 +65,56 @@ func solution() int {
 		nodes[split[0]] = append(nodes[split[0]], strings.TrimPrefix(split2[0], "("))
 		nodes[split[0]] = append(nodes[split[0]], strings.TrimSuffix(split2[1], ")"))
 		if string(split[0][2]) == "A" {
-			startNodes[split[0]] = append(startNodes[split[0]], strings.TrimPrefix(split2[0], "("))
-			startNodes[split[0]] = append(startNodes[split[0]], strings.TrimSuffix(split2[1], ")"))
+			startNode := StartNode{}
+			startNode.lastCount = 0
+			startNode.lastTurnIdx = 0
+			startNode.nextNode = ""
+			startNodes[split[0]] = startNode
 		}
 	}
 
-	total := 0
-	turnIdx := 0
-	nextNodes := map[string]string{}
 	nextNode := ""
-	done := true
-	matchCount := 0
-	maxCount := 0
+	counts := []int{}
 	var wg sync.WaitGroup
-	// keep looping until we find the end
-	for true {
-		done = true
-		matchCount = 0
-		for node, _ := range startNodes {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				if nextNodes[node] == "" {
-					nextNode = nodes[node][directions[turns[turnIdx]]]
+	for node, _ := range startNodes {
+		wg.Add(1)
+		go func(n string) {
+			defer wg.Done()
+			sn := startNodes[n]
+			i := 0
+			j := 0
+			nextNode = sn.nextNode
+			for true {
+				if nextNode == "" {
+					nextNode = nodes[n][directions[turns[j]]]
 				} else {
-					nextNode = nodes[nextNodes[node]][directions[turns[turnIdx]]]
+					nextNode = nodes[sn.nextNode][directions[turns[j]]]
 				}
-				nextNodes[node] = nextNode
-				if !strings.HasSuffix(nextNode, "Z") {
-					done = false
-				} else {
-					matchCount += 1
+				i += 1
+				j += 1
+				// if we've exhausted the list of turns, start over
+				if j >= len(turns) {
+					j = 0
 				}
-			}()
-			wg.Wait()
-		}
-		if matchCount > maxCount {
-			maxCount = matchCount
-			fmt.Println(maxCount, nextNodes)
-		}
-		turnIdx += 1
-		// if we've exhausted the list of turns, start over
-		if turnIdx == len(turns) {
-			turnIdx = 0
-		}
-		total += 1
-		// check to see if all paths have landed on an ending node
-		if done {
-			break
-		}
+				sn.nextNode = nextNode
+				if strings.HasSuffix(nextNode, "Z") {
+					sn.lastCount = i
+					sn.lastTurnIdx = j
+					startNodes[node] = sn
+					counts = append(counts, sn.lastCount)
+					return
+				}
+			}
+		}(node)
+		wg.Wait()
 	}
 
-	return total
+	countLcm := lcm(counts[0], counts[1])
+	for i := 2; i < len(counts); i += 1 {
+		countLcm = lcm(countLcm, counts[i])
+	}
+
+	return countLcm
 }
 
 func main() {
