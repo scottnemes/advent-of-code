@@ -10,7 +10,6 @@ import (
 
 func calcDistance(a []int, b []int) float64 {
 	return math.Abs(float64(a[0]-b[0])) + math.Abs(float64(a[1]-b[1]))
-	//return math.Sqrt(math.Abs(float64((b[0]-a[0])^2)) + math.Abs(float64((b[1]-a[1])^2)))
 }
 
 func solution() int {
@@ -22,10 +21,13 @@ func solution() int {
 
 	defer inputs.Close()
 	galixies := [][]string{}
-	i := 0
+	i := 1
 	y := 0
 	empty := true
 	expansionSize := 1000000 - 1
+
+	emptyRows := []int{}
+	emptyCols := []int{}
 
 	scanner := bufio.NewScanner(inputs)
 	for scanner.Scan() {
@@ -44,17 +46,11 @@ func solution() int {
 			row = append(row, string(newChar))
 		}
 		galixies = append(galixies, row)
-		fmt.Println("Expanding rows", y)
 		if empty {
-			for e := 0; e < expansionSize; e += 1 {
-				galixies = append(galixies, row)
-				y += 1
-			}
+			emptyRows = append(emptyRows, y)
 		}
 		y += 1
 	}
-
-	emptyCols := []int{}
 
 	for x := 0; x < len(galixies[0]); x += 1 {
 		empty := true
@@ -69,17 +65,6 @@ func solution() int {
 		}
 	}
 
-	for y, _ := range galixies {
-		loopCount := 0
-		for _, x := range emptyCols {
-			fmt.Println("Expanding cols", len(galixies), y, x)
-			for e := 0; e < expansionSize; e += 1 {
-				galixies[y] = append(galixies[y][:x+1+loopCount], galixies[y][x+loopCount:]...)
-				loopCount += 1
-			}
-		}
-	}
-
 	positions := map[int][]int{}
 	for x := 0; x < len(galixies[0]); x += 1 {
 		for y := 0; y < len(galixies); y += 1 {
@@ -90,16 +75,32 @@ func solution() int {
 		}
 	}
 
-	// print map
-	// for _, row := range galixies {
-	// 	fmt.Println(row)
-	// }
+	expandPositions := map[int][]int{}
+	for k, v := range positions {
+		expandPositions[k] = append(expandPositions[k], v...)
+	}
+
+	// expand galaxies
+	for _, y := range emptyRows {
+		for k, coords := range positions {
+			if coords[1] > y {
+				expandPositions[k][1] += expansionSize
+			}
+		}
+	}
+	for _, x := range emptyCols {
+		for k, coords := range positions {
+			if coords[0] > x {
+				expandPositions[k][0] += expansionSize
+			}
+		}
+	}
 
 	distances := map[string]int{}
 	total := 0
 
-	for num1, coords1 := range positions {
-		for num2, coords2 := range positions {
+	for num1, coords1 := range expandPositions {
+		for num2, coords2 := range expandPositions {
 			if num1 == num2 {
 				continue
 			}
@@ -116,9 +117,6 @@ func solution() int {
 			total += dist
 		}
 	}
-
-	// fmt.Println(distances["6-0"], distances["0-6"])
-	// fmt.Println(distances["2-5"], distances["5-2"])
 
 	return total
 }

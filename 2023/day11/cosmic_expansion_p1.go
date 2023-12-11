@@ -10,7 +10,6 @@ import (
 
 func calcDistance(a []int, b []int) float64 {
 	return math.Abs(float64(a[0]-b[0])) + math.Abs(float64(a[1]-b[1]))
-	//return math.Sqrt(math.Abs(float64((b[0]-a[0])^2)) + math.Abs(float64((b[1]-a[1])^2)))
 }
 
 func solution() int {
@@ -81,11 +80,6 @@ func solution() int {
 			}
 		}
 	}
-
-	// print map
-	// for _, row := range galixies {
-	// 	fmt.Println(row)
-	// }
 
 	distances := map[string]int{}
 	total := 0
