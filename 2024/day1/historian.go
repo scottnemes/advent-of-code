@@ -30,10 +30,10 @@ func solution1() int {
 	for scanner.Scan() {
 		line := scanner.Text()
 		locations := strings.Split(line, "   ")
-		one, _ := strconv.Atoi(locations[0])
-		two, _ := strconv.Atoi(locations[1])
-		locations_one = append(locations_one, float64(one))
-		locations_two = append(locations_two, float64(two))
+		one, _ := strconv.ParseFloat(locations[0], 64)
+		two, _ := strconv.ParseFloat(locations[1], 64)
+		locations_one = append(locations_one, one)
+		locations_two = append(locations_two, two)
 	}
 
 	if err := scanner.Err(); err != nil {
