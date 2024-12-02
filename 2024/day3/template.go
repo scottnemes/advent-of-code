@@ -22,7 +22,7 @@ func solution1() int {
 	scanner := bufio.NewScanner(inputs)
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println(line)
+		_ = line
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -43,7 +43,7 @@ func solution2() int {
 	scanner := bufio.NewScanner(inputs)
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println(line)
+		_ = line
 	}
 
 	if err := scanner.Err(); err != nil {
