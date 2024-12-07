@@ -13,7 +13,7 @@ type value struct {
 }
 
 func solution1() int {
-	inputs, err := os.Open("input.txt")
+	inputs, err := os.Open("sample.txt")
 	if err != nil {
 		fmt.Println("Failed to open puzzle inputs, RIP:", err)
 		return -1
@@ -125,7 +125,7 @@ func solution1() int {
 }
 
 func solution2() int {
-	inputs, err := os.Open("input.txt")
+	inputs, err := os.Open("sample.txt")
 	if err != nil {
 		fmt.Println("Failed to open puzzle inputs, RIP:", err)
 		return -1
@@ -259,8 +259,10 @@ func solution2() int {
 	// 3,8
 	// 7,9
 
+	// visited_coords = [][]int{{7, 8}}
+
 	for _, coords := range visited_coords {
-		added_block := fmt.Sprintf("%d-%d", coords[0], coords[1])
+		// added_block := fmt.Sprintf("%d-%d", coords[0], coords[1])
 		copy(pos, start_pos)
 		seen_blocks := []string{}
 		guard_map := make([][]string, len(guard_map_copy))
@@ -283,12 +285,13 @@ func solution2() int {
 				}
 				if guard_map[y-1][x] == "#" {
 					// blocked
-					c := fmt.Sprintf("%d-%d", x, y-1)
-					if c == added_block && slices.Contains(seen_blocks, c) {
+					c := fmt.Sprintf("%d-%d-%s", x, y-1, facing)
+					if slices.Contains(seen_blocks, c) {
 						done = true
 						total += 1
 						// fmt.Println("Current:", pos, "Moving:", facing, "Block:", c, "Added Coords:", coords)
 					} else {
+						// fmt.Println("Block:", c)
 						seen_blocks = append(seen_blocks, c)
 					}
 					facing = "E"
@@ -306,12 +309,13 @@ func solution2() int {
 				}
 				if guard_map[y+1][x] == "#" {
 					// blocked
-					c := fmt.Sprintf("%d-%d", x, y+1)
-					if c == added_block && slices.Contains(seen_blocks, c) {
+					c := fmt.Sprintf("%d-%d-%s", x, y+1, facing)
+					if slices.Contains(seen_blocks, c) {
 						done = true
 						total += 1
 						// fmt.Println("Current:", pos, "Moving:", facing, "Block:", c, "Added Coords:", coords)
 					} else {
+						// fmt.Println("Block:", c)
 						seen_blocks = append(seen_blocks, c)
 					}
 					facing = "W"
@@ -329,12 +333,13 @@ func solution2() int {
 				}
 				if guard_map[y][x+1] == "#" {
 					// blocked
-					c := fmt.Sprintf("%d-%d", x+1, y)
-					if c == added_block && slices.Contains(seen_blocks, c) {
+					c := fmt.Sprintf("%d-%d-%s", x+1, y, facing)
+					if slices.Contains(seen_blocks, c) {
 						done = true
 						total += 1
 						// fmt.Println("Current:", pos, "Moving:", facing, "Block:", c, "Added Coords:", coords)
 					} else {
+						// fmt.Println("Block:", c)
 						seen_blocks = append(seen_blocks, c)
 					}
 					facing = "S"
@@ -352,12 +357,13 @@ func solution2() int {
 				}
 				if guard_map[y][x-1] == "#" {
 					// blocked
-					c := fmt.Sprintf("%d-%d", x-1, y)
-					if c == added_block && slices.Contains(seen_blocks, c) {
+					c := fmt.Sprintf("%d-%d-%s", x-1, y, facing)
+					if slices.Contains(seen_blocks, c) {
 						done = true
 						total += 1
 						// fmt.Println("Current:", pos, "Moving:", facing, "Block:", c, "Added Coords:", coords)
 					} else {
+						// fmt.Println("Block:", c)
 						seen_blocks = append(seen_blocks, c)
 					}
 					facing = "N"
