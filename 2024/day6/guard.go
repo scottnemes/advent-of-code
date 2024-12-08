@@ -125,7 +125,7 @@ func solution1() int {
 }
 
 func solution2() int {
-	inputs, err := os.Open("sample.txt")
+	inputs, err := os.Open("input.txt")
 	if err != nil {
 		fmt.Println("Failed to open puzzle inputs, RIP:", err)
 		return -1
@@ -264,7 +264,6 @@ func solution2() int {
 	for _, coords := range visited_coords {
 		// added_block := fmt.Sprintf("%d-%d", coords[0], coords[1])
 		copy(pos, start_pos)
-		seen_blocks := []string{}
 		guard_map := make([][]string, len(guard_map_copy))
 		for i := range guard_map_copy {
 			guard_map[i] = make([]string, len(guard_map_copy[i]))
@@ -273,106 +272,97 @@ func solution2() int {
 		guard_map[coords[1]][coords[0]] = "#"
 		done = false
 		facing = "N"
+		// visited_blocks := []string{fmt.Sprintf("%d-%d-%s", pos[0], pos[1], facing)}
+		visited_blocks := []string{}
+		fmt.Println(coords)
 		for !done {
 			x := pos[0]
 			y := pos[1]
 			switch facing {
 			case "N":
-				if y-1 < 0 {
+				next_x := x
+				next_y := y - 1
+				if next_y < 0 {
 					// edge of map
 					done = true
 					break
 				}
-				if guard_map[y-1][x] == "#" {
+				tile := fmt.Sprintf("%d-%d-%s", next_x, next_y, facing)
+				if slices.Contains(visited_blocks, tile) {
+					done = true
+					total += 1
+					break
+				}
+				if guard_map[next_y][next_x] == "#" {
 					// blocked
-					c := fmt.Sprintf("%d-%d-%s", x, y-1, facing)
-					if slices.Contains(seen_blocks, c) {
-						done = true
-						total += 1
-						// fmt.Println("Current:", pos, "Moving:", facing, "Block:", c, "Added Coords:", coords)
-					} else {
-						// fmt.Println("Block:", c)
-						seen_blocks = append(seen_blocks, c)
-					}
 					facing = "E"
 					break
 				}
-				pos[1] -= 1
-				if guard_map[y-1][x] != "X" {
-					guard_map[y-1][x] = "X"
-				}
+				visited_blocks = append(visited_blocks, tile)
+				pos[1] = next_y
 			case "S":
-				if y+1 > max_y {
+				next_x := x
+				next_y := y + 1
+				if next_y > max_y {
 					// edge of map
 					done = true
 					break
 				}
-				if guard_map[y+1][x] == "#" {
+				tile := fmt.Sprintf("%d-%d-%s", next_x, next_y, facing)
+				if slices.Contains(visited_blocks, tile) {
+					done = true
+					total += 1
+					break
+				}
+				if guard_map[next_y][next_x] == "#" {
 					// blocked
-					c := fmt.Sprintf("%d-%d-%s", x, y+1, facing)
-					if slices.Contains(seen_blocks, c) {
-						done = true
-						total += 1
-						// fmt.Println("Current:", pos, "Moving:", facing, "Block:", c, "Added Coords:", coords)
-					} else {
-						// fmt.Println("Block:", c)
-						seen_blocks = append(seen_blocks, c)
-					}
 					facing = "W"
 					break
 				}
-				pos[1] += 1
-				if guard_map[y+1][x] != "X" {
-					guard_map[y+1][x] = "X"
-				}
+				visited_blocks = append(visited_blocks, tile)
+				pos[1] = next_y
 			case "E":
-				if x+1 > max_x {
+				next_x := x + 1
+				next_y := y
+				if next_x > max_x {
 					// edge of map
 					done = true
 					break
 				}
-				if guard_map[y][x+1] == "#" {
+				tile := fmt.Sprintf("%d-%d-%s", next_x, next_y, facing)
+				if slices.Contains(visited_blocks, tile) {
+					done = true
+					total += 1
+					break
+				}
+				if guard_map[next_y][next_x] == "#" {
 					// blocked
-					c := fmt.Sprintf("%d-%d-%s", x+1, y, facing)
-					if slices.Contains(seen_blocks, c) {
-						done = true
-						total += 1
-						// fmt.Println("Current:", pos, "Moving:", facing, "Block:", c, "Added Coords:", coords)
-					} else {
-						// fmt.Println("Block:", c)
-						seen_blocks = append(seen_blocks, c)
-					}
 					facing = "S"
 					break
 				}
-				pos[0] += 1
-				if guard_map[y][x+1] != "X" {
-					guard_map[y][x+1] = "X"
-				}
+				visited_blocks = append(visited_blocks, tile)
+				pos[0] = next_x
 			case "W":
-				if x-1 < 0 {
+				next_x := x - 1
+				next_y := y
+				if next_x < 0 {
 					// edge of map
 					done = true
 					break
 				}
-				if guard_map[y][x-1] == "#" {
+				tile := fmt.Sprintf("%d-%d-%s", next_x, next_y, facing)
+				if slices.Contains(visited_blocks, tile) {
+					done = true
+					total += 1
+					break
+				}
+				if guard_map[next_y][next_x] == "#" {
 					// blocked
-					c := fmt.Sprintf("%d-%d-%s", x-1, y, facing)
-					if slices.Contains(seen_blocks, c) {
-						done = true
-						total += 1
-						// fmt.Println("Current:", pos, "Moving:", facing, "Block:", c, "Added Coords:", coords)
-					} else {
-						// fmt.Println("Block:", c)
-						seen_blocks = append(seen_blocks, c)
-					}
 					facing = "N"
 					break
 				}
-				pos[0] -= 1
-				if guard_map[y][x-1] != "X" {
-					guard_map[y][x-1] = "X"
-				}
+				visited_blocks = append(visited_blocks, tile)
+				pos[0] = next_x
 			}
 		}
 	}
