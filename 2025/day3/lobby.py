@@ -27,20 +27,15 @@ def main():
     # print(total)
 
     # Part 2
-    # 837905266357201192774153975965072960276319014627339281004922249271022419931806730707108158287237275 too high
-    # 147293551176578 too low
-    batteries = get_input("sample.txt")
+    batteries = get_input("input.txt")
     total = 0
     batteries_needed = 12
-    removable = len(batteries[0]) - 1 - batteries_needed
     for bank in batteries:
         bank = bank[:-1]
         batteries_remaining = len(bank)
         joltage = ""
         max_removed = False
-        #print(bank)
-        for i, battery in enumerate(bank):
-            print(f"joltage: {joltage}, batteries_remaining: {batteries_remaining}, left: {batteries_remaining + len(joltage)}")
+        for i, _ in enumerate(bank):
             if len(joltage) == batteries_needed:
                 break
             if max_removed or batteries_remaining + len(joltage) <= batteries_needed:
@@ -48,11 +43,15 @@ def main():
                 batteries_remaining -= 1
                 max_removed = True
                 continue
-            if bank[i] >= bank[i+1]:
+            skipped = False
+            for bat in bank[i+1:len(bank)-batteries_needed+len(joltage)+1]:
+                if bat > bank[i]:
+                    skipped = True
+                    break
+            if not skipped:
                 joltage += bank[i]
             batteries_remaining -= 1
         total += int(joltage)
-        print(joltage)
     print(total)
 
 
